@@ -1,0 +1,67 @@
+{
+	"name": "Agg_customer_summary",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_dw",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SQL_Datasets"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "customer_id",
+				"type": "varchar"
+			},
+			{
+				"name": "full_name",
+				"type": "varchar"
+			},
+			{
+				"name": "city",
+				"type": "varchar"
+			},
+			{
+				"name": "tier",
+				"type": "varchar"
+			},
+			{
+				"name": "segment",
+				"type": "varchar"
+			},
+			{
+				"name": "total_orders",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "total_spend",
+				"type": "decimal",
+				"precision": 16,
+				"scale": 2
+			},
+			{
+				"name": "avg_order_value",
+				"type": "decimal",
+				"precision": 12,
+				"scale": 2
+			},
+			{
+				"name": "last_order_date",
+				"type": "date"
+			},
+			{
+				"name": "loyalty_points",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "agg_customer_summary"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

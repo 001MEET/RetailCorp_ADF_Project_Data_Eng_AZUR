@@ -1,0 +1,86 @@
+{
+	"name": "df_agg_monthly_revenue",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dim_FactOrders",
+						"type": "DatasetReference"
+					},
+					"name": "sourceFactOrders"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Agg_Monthly_Revenue",
+						"type": "DatasetReference"
+					},
+					"name": "sinkMonthlyRevenue"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedRevenue"
+				},
+				{
+					"name": "aggMonthlyRevenue"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          order_id as string,",
+				"          customer_id as string,",
+				"          order_date as date,",
+				"          order_time as timestamp,",
+				"          channel as string,",
+				"          status as string,",
+				"          payment_mode as string,",
+				"          subtotal_amount as decimal(14,2),",
+				"          tax_amount as decimal(12,2),",
+				"          shipping_charge as decimal(10,2),",
+				"          total_amount as decimal(14,2),",
+				"          delivery_city as string,",
+				"          warehouse_id as string,",
+				"          is_gift as boolean,",
+				"          expected_delivery_date as date,",
+				"          actual_delivery_date as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceFactOrders",
+				"sourceFactOrders derive(revenue_year = year(toDate(toString(order_date),'yyyy-MM-dd')),",
+				"          revenue_month = month(toDate(toString(order_date),'yyyy-MM-dd'))) ~> derivedRevenue",
+				"derivedRevenue aggregate(groupBy(revenue_year,",
+				"          revenue_month,",
+				"          delivery_city),",
+				"     {total_revenue } = sum(total_amount)) ~> aggMonthlyRevenue",
+				"aggMonthlyRevenue sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          agg_id as integer,",
+				"          city as string,",
+				"          revenue_year as integer,",
+				"          revenue_month as integer,",
+				"          online_order_revenue as decimal(18,2),",
+				"          store_revenue as decimal(18,2),",
+				"          total_revenue as decimal(18,2),",
+				"          online_order_count as integer,",
+				"          store_transaction_count as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkMonthlyRevenue"
+			]
+		}
+	}
+}

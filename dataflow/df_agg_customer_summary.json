@@ -1,0 +1,117 @@
+{
+	"name": "df_agg_customer_summary",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dim_FactOrders",
+						"type": "DatasetReference"
+					},
+					"name": "sourceOrders"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dim_Customer",
+						"type": "DatasetReference"
+					},
+					"name": "sourceCustomers"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Agg_customer_summary",
+						"type": "DatasetReference"
+					},
+					"name": "sinkCustomerSummary"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggCustomers"
+				},
+				{
+					"name": "joinCustomers"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          order_id as string,",
+				"          customer_id as string,",
+				"          order_date as date,",
+				"          order_time as timestamp,",
+				"          channel as string,",
+				"          status as string,",
+				"          payment_mode as string,",
+				"          subtotal_amount as decimal(14,2),",
+				"          tax_amount as decimal(12,2),",
+				"          shipping_charge as decimal(10,2),",
+				"          total_amount as decimal(14,2),",
+				"          delivery_city as string,",
+				"          warehouse_id as string,",
+				"          is_gift as boolean,",
+				"          expected_delivery_date as date,",
+				"          actual_delivery_date as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceOrders",
+				"source(output(",
+				"          customer_id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          email as string,",
+				"          phone as string,",
+				"          city as string,",
+				"          state as string,",
+				"          pincode as string,",
+				"          tier as string,",
+				"          segment as string,",
+				"          registration_date as date,",
+				"          credit_limit as decimal(12,2),",
+				"          loyalty_points as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceCustomers",
+				"sourceOrders aggregate(groupBy(customer_id),",
+				"     {total_orders } = count(order_id),",
+				"          {total_spend } = sum(total_amount),",
+				"          avg_order_value = avg(total_amount),",
+				"          {last_order_date } = max(order_date)) ~> aggCustomers",
+				"aggCustomers, sourceCustomers join(aggCustomers@customer_id == sourceCustomers@customer_id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinCustomers",
+				"joinCustomers sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          customer_id as string,",
+				"          full_name as string,",
+				"          city as string,",
+				"          tier as string,",
+				"          segment as string,",
+				"          total_orders as integer,",
+				"          total_spend as decimal(16,2),",
+				"          avg_order_value as decimal(12,2),",
+				"          last_order_date as date,",
+				"          loyalty_points as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkCustomerSummary"
+			]
+		}
+	}
+}

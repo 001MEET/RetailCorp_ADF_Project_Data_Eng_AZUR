@@ -1,0 +1,128 @@
+{
+	"name": "df_dim_employees",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "JS_Blob_Employees",
+						"type": "DatasetReference"
+					},
+					"name": "sourceEmployees"
+				},
+				{
+					"dataset": {
+						"referenceName": "JS_Blob_Employees",
+						"type": "DatasetReference"
+					},
+					"name": "sourceManagers"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dim_Employees",
+						"type": "DatasetReference"
+					},
+					"name": "sinkEmployees"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggManagers"
+				},
+				{
+					"name": "joinEmployees"
+				},
+				{
+					"name": "derivedEmployees"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          employee_id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          email as string,",
+				"          phone as string,",
+				"          department as string,",
+				"          designation as string,",
+				"          city as string,",
+				"          date_of_joining as string,",
+				"          date_of_birth as string,",
+				"          education as string,",
+				"          base_salary as double,",
+				"          performance_rating as double,",
+				"          manager_id as string,",
+				"          is_active as boolean,",
+				"          annual_leaves_remaining as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'arrayOfDocuments') ~> sourceEmployees",
+				"source(output(",
+				"          employee_id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          email as string,",
+				"          phone as string,",
+				"          department as string,",
+				"          designation as string,",
+				"          city as string,",
+				"          date_of_joining as string,",
+				"          date_of_birth as string,",
+				"          education as string,",
+				"          base_salary as double,",
+				"          performance_rating as double,",
+				"          manager_id as string,",
+				"          is_active as boolean,",
+				"          annual_leaves_remaining as integer",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'arrayOfDocuments') ~> sourceManagers",
+				"sourceManagers aggregate(groupBy(manager_id),",
+				"     manager_count = count(manager_id)) ~> aggManagers",
+				"sourceEmployees, aggManagers join(employee_id == aggManagers@manager_id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinEmployees",
+				"joinEmployees derive(is_manager = iif(!isNull(aggManagers@manager_id), 1, 0)) ~> derivedEmployees",
+				"derivedEmployees sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          employee_id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          email as string,",
+				"          phone as string,",
+				"          department as string,",
+				"          designation as string,",
+				"          city as string,",
+				"          date_of_joining as date,",
+				"          date_of_birth as date,",
+				"          education as string,",
+				"          base_salary as decimal(12,2),",
+				"          performance_rating as decimal(3,1),",
+				"          manager_id as string,",
+				"          is_active as boolean,",
+				"          annual_leaves_remaining as integer,",
+				"          is_manager as boolean",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkEmployees"
+			]
+		}
+	}
+}

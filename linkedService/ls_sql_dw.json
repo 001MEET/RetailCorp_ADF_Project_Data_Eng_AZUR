@@ -1,0 +1,17 @@
+{
+	"name": "ls_sql_dw",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"server": "db-retailcorp.database.windows.net",
+			"database": "sqldb-retailcorp-dw",
+			"encrypt": "optional",
+			"trustServerCertificate": true,
+			"authenticationType": "SQL",
+			"userName": "SQLAdmin",
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQDU2Q0QzNDc1LUM3RUUtNEMzNS1BOTJELTM4RUU1M0FFMUUwQl9hN2VlMDUyNy00OWM5LTRmYmUtYmVlNS1iZmUxYTdlNGU3ODkiDQp9"
+		}
+	}
+}

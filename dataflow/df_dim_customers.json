@@ -1,0 +1,79 @@
+{
+	"name": "df_dim_customers",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Blob_Customer",
+						"type": "DatasetReference"
+					},
+					"name": "sourceCustomers"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dim_Customer",
+						"type": "DatasetReference"
+					},
+					"name": "sinkCustomers"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filterActiveCustomers"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          customer_id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          email as string,",
+				"          phone as string,",
+				"          city as string,",
+				"          state as string,",
+				"          pincode as string,",
+				"          tier as string,",
+				"          segment as string,",
+				"          registration_date as string,",
+				"          is_active as string,",
+				"          credit_limit as string,",
+				"          loyalty_points as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceCustomers",
+				"sourceCustomers filter(is_active == '1') ~> filterActiveCustomers",
+				"filterActiveCustomers sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          customer_id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          email as string,",
+				"          phone as string,",
+				"          city as string,",
+				"          state as string,",
+				"          pincode as string,",
+				"          tier as string,",
+				"          segment as string,",
+				"          registration_date as date,",
+				"          credit_limit as decimal(12,2),",
+				"          loyalty_points as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkCustomers"
+			]
+		}
+	}
+}

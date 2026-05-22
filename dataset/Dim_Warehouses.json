@@ -1,0 +1,25 @@
+{
+	"name": "Dim_Warehouses",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_dw",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SQL_Datasets"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "warehouse_id",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "dim_warehouses"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

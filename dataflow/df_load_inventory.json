@@ -1,0 +1,81 @@
+{
+	"name": "df_load_inventory",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "JS_Blob_Inventory",
+						"type": "DatasetReference"
+					},
+					"name": "sourceInventory"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dim_Fact_Inventory_Snapshots",
+						"type": "DatasetReference"
+					},
+					"name": "sinkInventory"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedInventory"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          snapshot_id as string,",
+				"          snapshot_date as string,",
+				"          warehouse_id as string,",
+				"          product_id as string,",
+				"          product_name as string,",
+				"          category as string,",
+				"          qty_on_hand as integer,",
+				"          qty_reserved as integer,",
+				"          qty_in_transit as integer,",
+				"          unit_cost as double,",
+				"          total_inventory_value as double,",
+				"          days_of_supply as double,",
+				"          last_received_date as string,",
+				"          reorder_triggered as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'documentPerLine') ~> sourceInventory",
+				"sourceInventory derive(reorder_flag = iif(reorder_triggered == true(), 'Yes', 'No')) ~> derivedInventory",
+				"derivedInventory sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          snapshot_id as string,",
+				"          snapshot_date as date,",
+				"          warehouse_id as string,",
+				"          product_id as string,",
+				"          product_name as string,",
+				"          category as string,",
+				"          qty_on_hand as integer,",
+				"          qty_reserved as integer,",
+				"          qty_in_transit as integer,",
+				"          unit_cost as decimal(12,2),",
+				"          total_inventory_value as decimal(16,2),",
+				"          days_of_supply as decimal(8,1),",
+				"          last_received_date as date,",
+				"          reorder_flag as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkInventory"
+			]
+		}
+	}
+}

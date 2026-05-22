@@ -1,0 +1,68 @@
+{
+	"name": "Agg_Monthly_Revenue",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_dw",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SQL_Datasets"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "agg_id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "city",
+				"type": "varchar"
+			},
+			{
+				"name": "revenue_year",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "revenue_month",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "online_order_revenue",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "store_revenue",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "total_revenue",
+				"type": "decimal",
+				"precision": 18,
+				"scale": 2
+			},
+			{
+				"name": "online_order_count",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "store_transaction_count",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "agg_monthly_revenue"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

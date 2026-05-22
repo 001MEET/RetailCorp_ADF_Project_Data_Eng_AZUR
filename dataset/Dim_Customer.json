@@ -1,0 +1,76 @@
+{
+	"name": "Dim_Customer",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_sql_dw",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "SQL_Datasets"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "customer_id",
+				"type": "varchar"
+			},
+			{
+				"name": "first_name",
+				"type": "varchar"
+			},
+			{
+				"name": "last_name",
+				"type": "varchar"
+			},
+			{
+				"name": "email",
+				"type": "varchar"
+			},
+			{
+				"name": "phone",
+				"type": "varchar"
+			},
+			{
+				"name": "city",
+				"type": "varchar"
+			},
+			{
+				"name": "state",
+				"type": "varchar"
+			},
+			{
+				"name": "pincode",
+				"type": "varchar"
+			},
+			{
+				"name": "tier",
+				"type": "varchar"
+			},
+			{
+				"name": "segment",
+				"type": "varchar"
+			},
+			{
+				"name": "registration_date",
+				"type": "date"
+			},
+			{
+				"name": "credit_limit",
+				"type": "decimal",
+				"precision": 12,
+				"scale": 2
+			},
+			{
+				"name": "loyalty_points",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "dim_customers"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

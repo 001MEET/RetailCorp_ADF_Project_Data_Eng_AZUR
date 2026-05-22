@@ -1,0 +1,79 @@
+{
+	"name": "df_dim_suppliers",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Blob_Supplier",
+						"type": "DatasetReference"
+					},
+					"name": "sourcesuppliers"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dim_Suppliers",
+						"type": "DatasetReference"
+					},
+					"name": "sinkSuppliers"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedContractActive"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          supplier_id as string,",
+				"          supplier_name as string,",
+				"          contact_person as string,",
+				"          email as string,",
+				"          phone as string,",
+				"          city as string,",
+				"          country as string,",
+				"          payment_terms_days as string,",
+				"          rating as string,",
+				"          contract_start_date as string,",
+				"          contract_end_date as date,",
+				"          is_active as string,",
+				"          gst_number as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourcesuppliers",
+				"sourcesuppliers derive(is_contract_active = iif(contract_end_date > currentDate(), 'Yes', 'No')) ~> derivedContractActive",
+				"derivedContractActive sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          supplier_id as string,",
+				"          supplier_name as string,",
+				"          contact_person as string,",
+				"          email as string,",
+				"          phone as string,",
+				"          city as string,",
+				"          country as string,",
+				"          payment_terms_days as integer,",
+				"          rating as decimal(3,1),",
+				"          contract_start_date as date,",
+				"          contract_end_date as date,",
+				"          is_contract_active as boolean,",
+				"          is_active as boolean,",
+				"          gst_number as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkSuppliers"
+			]
+		}
+	}
+}

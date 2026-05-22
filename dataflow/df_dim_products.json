@@ -1,0 +1,76 @@
+{
+	"name": "df_dim_products",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Blob_Product",
+						"type": "DatasetReference"
+					},
+					"name": "sourceProducts"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dim_Product",
+						"type": "DatasetReference"
+					},
+					"name": "sinkProducts"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedProducts"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          product_id as string,",
+				"          product_name as string,",
+				"          category as string,",
+				"          sub_category as string,",
+				"          supplier_id as string,",
+				"          unit_price as string,",
+				"          cost_price as string,",
+				"          stock_quantity as string,",
+				"          reorder_level as string,",
+				"          weight_kg as string,",
+				"          is_active as integer,",
+				"          launch_date as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceProducts",
+				"sourceProducts derive(is_discontinued = iif(is_active == 0, 'Yes', 'No')) ~> derivedProducts",
+				"derivedProducts sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          product_id as string,",
+				"          product_name as string,",
+				"          category as string,",
+				"          sub_category as string,",
+				"          supplier_id as string,",
+				"          unit_price as decimal(12,2),",
+				"          cost_price as decimal(12,2),",
+				"          stock_quantity as integer,",
+				"          reorder_level as integer,",
+				"          weight_kg as decimal(8,2),",
+				"          is_discontinued as boolean,",
+				"          launch_date as date",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkProducts"
+			]
+		}
+	}
+}

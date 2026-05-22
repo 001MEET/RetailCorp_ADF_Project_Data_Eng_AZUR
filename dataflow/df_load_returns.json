@@ -1,0 +1,75 @@
+{
+	"name": "df_load_returns",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DS_Blob_ReturnandRefund",
+						"type": "DatasetReference"
+					},
+					"name": "sourceReturns"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dim_FactReturns",
+						"type": "DatasetReference"
+					},
+					"name": "sinkReturns"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedReturns"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          return_id as string,",
+				"          order_id as string,",
+				"          customer_id as string,",
+				"          return_date as string,",
+				"          reason as string,",
+				"          return_status as string,",
+				"          refund_amount as string,",
+				"          refund_mode as string,",
+				"          refund_date as string,",
+				"          restocking_fee as string,",
+				"          condition_on_return as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> sourceReturns",
+				"sourceReturns derive(rejected_flag = iif(return_status == 'Rejected', 1, 0)) ~> derivedReturns",
+				"derivedReturns sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          return_id as string,",
+				"          order_id as string,",
+				"          customer_id as string,",
+				"          return_date as date,",
+				"          reason as string,",
+				"          return_status as string,",
+				"          refund_amount as decimal(14,2),",
+				"          refund_mode as string,",
+				"          refund_date as date,",
+				"          restocking_fee as decimal(10,2),",
+				"          condition_on_return as string,",
+				"          rejected_flag as boolean",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkReturns"
+			]
+		}
+	}
+}

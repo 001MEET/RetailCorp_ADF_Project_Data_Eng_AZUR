@@ -1,0 +1,88 @@
+{
+	"name": "df_load_store_transactions",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dim_fact_Store_transactions",
+						"type": "DatasetReference"
+					},
+					"name": "sourceTransactions"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dim_fact_Store_transactions",
+						"type": "DatasetReference"
+					},
+					"name": "sinkTransactions"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedTransactions"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          transaction_id as string,",
+				"          store_id as string,",
+				"          store_name as string,",
+				"          city as string,",
+				"          transaction_date as date,",
+				"          transaction_time as timestamp,",
+				"          transaction_year as integer,",
+				"          transaction_month as integer,",
+				"          cashier_employee_id as string,",
+				"          customer_id as string,",
+				"          num_products as integer,",
+				"          gross_amount as decimal(12,2),",
+				"          discount_amount as decimal(10,2),",
+				"          net_amount as decimal(12,2),",
+				"          payment_mode as string,",
+				"          invoice_number as string,",
+				"          is_returned as boolean",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceTransactions",
+				"sourceTransactions derive(transaction_year = year(toDate(toString(transaction_date),'yyyy-MM-dd')),",
+				"          transaction_month = toInteger(substring(toString(transaction_date),6,2))) ~> derivedTransactions",
+				"derivedTransactions sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          transaction_id as string,",
+				"          store_id as string,",
+				"          store_name as string,",
+				"          city as string,",
+				"          transaction_date as date,",
+				"          transaction_time as timestamp,",
+				"          transaction_year as integer,",
+				"          transaction_month as integer,",
+				"          cashier_employee_id as string,",
+				"          customer_id as string,",
+				"          num_products as integer,",
+				"          gross_amount as decimal(12,2),",
+				"          discount_amount as decimal(10,2),",
+				"          net_amount as decimal(12,2),",
+				"          payment_mode as string,",
+				"          invoice_number as string,",
+				"          is_returned as boolean",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkTransactions"
+			]
+		}
+	}
+}

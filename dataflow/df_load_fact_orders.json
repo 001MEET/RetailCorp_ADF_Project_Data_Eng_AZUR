@@ -1,0 +1,172 @@
+{
+	"name": "df_load_fact_orders",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "JS_Blob_Orders",
+						"type": "DatasetReference"
+					},
+					"name": "sourceOrders"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Dim_FactOrders",
+						"type": "DatasetReference"
+					},
+					"name": "sinkOrders"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dim_Fact_OrderItems",
+						"type": "DatasetReference"
+					},
+					"name": "sinkOrderItems"
+				}
+			],
+			"transformations": [
+				{
+					"name": "flattenOrders"
+				},
+				{
+					"name": "selectOrders"
+				},
+				{
+					"name": "selectOrderItems"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          order_id as string,",
+				"          customer_id as string,",
+				"          order_date as string,",
+				"          order_time as string,",
+				"          channel as string,",
+				"          status as string,",
+				"          payment_mode as string,",
+				"          subtotal_amount as double,",
+				"          tax_amount as double,",
+				"          shipping_charge as integer,",
+				"          total_amount as double,",
+				"          delivery_city as string,",
+				"          warehouse_id as string,",
+				"          is_gift as boolean,",
+				"          expected_delivery_date as string,",
+				"          actual_delivery_date as string,",
+				"          items as (order_id as string, product_id as string, product_name as string, quantity as integer, unit_price as double, discount_pct as double, line_total as double)[]",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'arrayOfDocuments') ~> sourceOrders",
+				"sourceOrders foldDown(unroll(items, items),",
+				"     mapColumn(",
+				"          order_id,",
+				"          customer_id,",
+				"          order_date,",
+				"          order_time,",
+				"          channel,",
+				"          status,",
+				"          payment_mode,",
+				"          subtotal_amount,",
+				"          tax_amount,",
+				"          shipping_charge,",
+				"          total_amount,",
+				"          delivery_city,",
+				"          warehouse_id,",
+				"          is_gift,",
+				"          expected_delivery_date,",
+				"          actual_delivery_date,",
+				"          items",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> flattenOrders",
+				"flattenOrders select(mapColumn(",
+				"          order_id,",
+				"          customer_id,",
+				"          order_date,",
+				"          order_time,",
+				"          channel,",
+				"          status,",
+				"          payment_mode,",
+				"          subtotal_amount,",
+				"          tax_amount,",
+				"          shipping_charge,",
+				"          total_amount,",
+				"          delivery_city,",
+				"          warehouse_id,",
+				"          is_gift,",
+				"          expected_delivery_date,",
+				"          actual_delivery_date",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectOrders",
+				"flattenOrders select(mapColumn(",
+				"          items = items.product_name,",
+				"          product_name = items.product_id,",
+				"          quantity = items.quantity,",
+				"          unit_price = items.unit_price,",
+				"          order_id = items.order_id,",
+				"          discount_pct = items.discount_pct,",
+				"          line_total = items.line_total",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selectOrderItems",
+				"selectOrders sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          order_id as string,",
+				"          customer_id as string,",
+				"          order_date as date,",
+				"          order_time as timestamp,",
+				"          channel as string,",
+				"          status as string,",
+				"          payment_mode as string,",
+				"          subtotal_amount as decimal(14,2),",
+				"          tax_amount as decimal(12,2),",
+				"          shipping_charge as decimal(10,2),",
+				"          total_amount as decimal(14,2),",
+				"          delivery_city as string,",
+				"          warehouse_id as string,",
+				"          is_gift as boolean,",
+				"          expected_delivery_date as date,",
+				"          actual_delivery_date as date",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkOrders",
+				"selectOrderItems sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          order_item_id as integer,",
+				"          order_id as string,",
+				"          product_id as string,",
+				"          product_name as string,",
+				"          quantity as integer,",
+				"          unit_price as decimal(12,2),",
+				"          discount_pct as decimal(5,2),",
+				"          line_total as decimal(14,2)",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkOrderItems"
+			]
+		}
+	}
+}

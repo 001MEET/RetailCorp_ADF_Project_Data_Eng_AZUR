@@ -1,0 +1,111 @@
+{
+	"name": "df_agg_product_performance",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Dim_Fact_OrderItems",
+						"type": "DatasetReference"
+					},
+					"name": "sourceOrderItems"
+				},
+				{
+					"dataset": {
+						"referenceName": "Dim_Product",
+						"type": "DatasetReference"
+					},
+					"name": "sourceProducts"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "Agg_Product_Performance",
+						"type": "DatasetReference"
+					},
+					"name": "sinkProductPerf"
+				}
+			],
+			"transformations": [
+				{
+					"name": "aggProducts"
+				},
+				{
+					"name": "joinProducts"
+				},
+				{
+					"name": "derivedProducts"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          order_item_id as integer,",
+				"          order_id as string,",
+				"          product_id as string,",
+				"          product_name as string,",
+				"          quantity as integer,",
+				"          unit_price as decimal(12,2),",
+				"          discount_pct as decimal(5,2),",
+				"          line_total as decimal(14,2)",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceOrderItems",
+				"source(output(",
+				"          product_id as string,",
+				"          product_name as string,",
+				"          category as string,",
+				"          sub_category as string,",
+				"          supplier_id as string,",
+				"          unit_price as decimal(12,2),",
+				"          cost_price as decimal(12,2),",
+				"          stock_quantity as integer,",
+				"          reorder_level as integer,",
+				"          weight_kg as decimal(8,2),",
+				"          is_discontinued as boolean,",
+				"          launch_date as date",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table') ~> sourceProducts",
+				"sourceOrderItems aggregate(groupBy(product_id,",
+				"          product_name),",
+				"     {total_units_sold } = sum(quantity),",
+				"          {total_revenue } = sum(line_total)) ~> aggProducts",
+				"aggProducts, sourceProducts join(aggProducts@product_id == sourceProducts@product_id,",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinProducts",
+				"joinProducts derive({current_stock } = stock_quantity,",
+				"          {return_rate_pct } = toDecimal(0.0)) ~> derivedProducts",
+				"derivedProducts sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          product_id as string,",
+				"          product_name as string,",
+				"          category as string,",
+				"          sub_category as string,",
+				"          total_units_sold as long,",
+				"          total_revenue as decimal(18,2),",
+				"          total_returns as integer,",
+				"          return_rate_pct as decimal(6,2),",
+				"          current_stock_qty as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     truncate:true,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sinkProductPerf"
+			]
+		}
+	}
+}
