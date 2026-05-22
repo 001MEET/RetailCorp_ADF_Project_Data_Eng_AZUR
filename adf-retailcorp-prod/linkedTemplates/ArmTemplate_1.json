@@ -1,0 +1,2026 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-retailcorp-prod"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Blob_StoreTransaction')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blob_storage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Blob_Datasets"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "store_transactions.csv",
+						"folderPath": "store_transactions.csv",
+						"container": "raw-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "transaction_id",
+						"type": "String"
+					},
+					{
+						"name": "store_id",
+						"type": "String"
+					},
+					{
+						"name": "store_name",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "transaction_date",
+						"type": "String"
+					},
+					{
+						"name": "transaction_time",
+						"type": "String"
+					},
+					{
+						"name": "cashier_employee_id",
+						"type": "String"
+					},
+					{
+						"name": "customer_id",
+						"type": "String"
+					},
+					{
+						"name": "num_products",
+						"type": "String"
+					},
+					{
+						"name": "gross_amount",
+						"type": "String"
+					},
+					{
+						"name": "discount_amount",
+						"type": "String"
+					},
+					{
+						"name": "net_amount",
+						"type": "String"
+					},
+					{
+						"name": "payment_mode",
+						"type": "String"
+					},
+					{
+						"name": "invoice_number",
+						"type": "String"
+					},
+					{
+						"name": "is_returned",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Blob_Supplier')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blob_storage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Blob_Datasets"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "supplier_master.csv",
+						"folderPath": "supplier_master.csv",
+						"container": "raw-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "supplier_id",
+						"type": "String"
+					},
+					{
+						"name": "supplier_name",
+						"type": "String"
+					},
+					{
+						"name": "contact_person",
+						"type": "String"
+					},
+					{
+						"name": "email",
+						"type": "String"
+					},
+					{
+						"name": "phone",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "payment_terms_days",
+						"type": "String"
+					},
+					{
+						"name": "rating",
+						"type": "String"
+					},
+					{
+						"name": "contract_start_date",
+						"type": "String"
+					},
+					{
+						"name": "contract_end_date",
+						"type": "String"
+					},
+					{
+						"name": "is_active",
+						"type": "String"
+					},
+					{
+						"name": "gst_number",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/JS_Blob_Employees')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blob_storage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Blob_Jason"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "employees.json",
+						"folderPath": "employees.json",
+						"container": "raw-data"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"employee_id": {
+							"type": "string"
+						},
+						"first_name": {
+							"type": "string"
+						},
+						"last_name": {
+							"type": "string"
+						},
+						"email": {
+							"type": "string"
+						},
+						"phone": {
+							"type": "string"
+						},
+						"department": {
+							"type": "string"
+						},
+						"designation": {
+							"type": "string"
+						},
+						"city": {
+							"type": "string"
+						},
+						"date_of_joining": {
+							"type": "string"
+						},
+						"date_of_birth": {
+							"type": "string"
+						},
+						"education": {
+							"type": "string"
+						},
+						"base_salary": {
+							"type": "number"
+						},
+						"performance_rating": {
+							"type": "number"
+						},
+						"manager_id": {
+							"type": "null"
+						},
+						"is_active": {
+							"type": "boolean"
+						},
+						"annual_leaves_remaining": {
+							"type": "integer"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/JS_Blob_Inventory')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blob_storage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Blob_Jason"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "inventory_snapshots.json",
+						"folderPath": "inventory_snapshots.json",
+						"container": "raw-data"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"snapshot_id": {
+							"type": "string"
+						},
+						"snapshot_date": {
+							"type": "string"
+						},
+						"warehouse_id": {
+							"type": "string"
+						},
+						"product_id": {
+							"type": "string"
+						},
+						"product_name": {
+							"type": "string"
+						},
+						"category": {
+							"type": "string"
+						},
+						"qty_on_hand": {
+							"type": "integer"
+						},
+						"qty_reserved": {
+							"type": "integer"
+						},
+						"qty_in_transit": {
+							"type": "integer"
+						},
+						"unit_cost": {
+							"type": "number"
+						},
+						"total_inventory_value": {
+							"type": "number"
+						},
+						"days_of_supply": {
+							"type": "number"
+						},
+						"last_received_date": {
+							"type": "string"
+						},
+						"reorder_triggered": {
+							"type": "boolean"
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/JS_Blob_Orders')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blob_storage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Blob_Jason"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "orders.json",
+						"folderPath": "orders.json",
+						"container": "raw-data"
+					}
+				},
+				"schema": {
+					"type": "object",
+					"properties": {
+						"order_id": {
+							"type": "string"
+						},
+						"customer_id": {
+							"type": "string"
+						},
+						"order_date": {
+							"type": "string"
+						},
+						"order_time": {
+							"type": "string"
+						},
+						"channel": {
+							"type": "string"
+						},
+						"status": {
+							"type": "string"
+						},
+						"payment_mode": {
+							"type": "string"
+						},
+						"subtotal_amount": {
+							"type": "number"
+						},
+						"tax_amount": {
+							"type": "number"
+						},
+						"shipping_charge": {
+							"type": "integer"
+						},
+						"total_amount": {
+							"type": "number"
+						},
+						"delivery_city": {
+							"type": "string"
+						},
+						"warehouse_id": {
+							"type": "string"
+						},
+						"is_gift": {
+							"type": "boolean"
+						},
+						"expected_delivery_date": {
+							"type": "string"
+						},
+						"actual_delivery_date": {
+							"type": "string"
+						},
+						"items": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"order_id": {
+										"type": "string"
+									},
+									"product_id": {
+										"type": "string"
+									},
+									"product_name": {
+										"type": "string"
+									},
+									"quantity": {
+										"type": "integer"
+									},
+									"unit_price": {
+										"type": "number"
+									},
+									"discount_pct": {
+										"type": "number"
+									},
+									"line_total": {
+										"type": "number"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_agg_customer_summary')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "Dim_FactOrders",
+								"type": "DatasetReference"
+							},
+							"name": "sourceOrders"
+						},
+						{
+							"dataset": {
+								"referenceName": "Dim_Customer",
+								"type": "DatasetReference"
+							},
+							"name": "sourceCustomers"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Agg_customer_summary",
+								"type": "DatasetReference"
+							},
+							"name": "sinkCustomerSummary"
+						}
+					],
+					"transformations": [
+						{
+							"name": "aggCustomers"
+						},
+						{
+							"name": "joinCustomers"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          order_id as string,",
+						"          customer_id as string,",
+						"          order_date as date,",
+						"          order_time as timestamp,",
+						"          channel as string,",
+						"          status as string,",
+						"          payment_mode as string,",
+						"          subtotal_amount as decimal(14,2),",
+						"          tax_amount as decimal(12,2),",
+						"          shipping_charge as decimal(10,2),",
+						"          total_amount as decimal(14,2),",
+						"          delivery_city as string,",
+						"          warehouse_id as string,",
+						"          is_gift as boolean,",
+						"          expected_delivery_date as date,",
+						"          actual_delivery_date as date",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceOrders",
+						"source(output(",
+						"          customer_id as string,",
+						"          first_name as string,",
+						"          last_name as string,",
+						"          email as string,",
+						"          phone as string,",
+						"          city as string,",
+						"          state as string,",
+						"          pincode as string,",
+						"          tier as string,",
+						"          segment as string,",
+						"          registration_date as date,",
+						"          credit_limit as decimal(12,2),",
+						"          loyalty_points as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceCustomers",
+						"sourceOrders aggregate(groupBy(customer_id),",
+						"     {total_orders } = count(order_id),",
+						"          {total_spend } = sum(total_amount),",
+						"          avg_order_value = avg(total_amount),",
+						"          {last_order_date } = max(order_date)) ~> aggCustomers",
+						"aggCustomers, sourceCustomers join(aggCustomers@customer_id == sourceCustomers@customer_id,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinCustomers",
+						"joinCustomers sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          customer_id as string,",
+						"          full_name as string,",
+						"          city as string,",
+						"          tier as string,",
+						"          segment as string,",
+						"          total_orders as integer,",
+						"          total_spend as decimal(16,2),",
+						"          avg_order_value as decimal(12,2),",
+						"          last_order_date as date,",
+						"          loyalty_points as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkCustomerSummary"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_agg_monthly_revenue')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "Dim_FactOrders",
+								"type": "DatasetReference"
+							},
+							"name": "sourceFactOrders"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Agg_Monthly_Revenue",
+								"type": "DatasetReference"
+							},
+							"name": "sinkMonthlyRevenue"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedRevenue"
+						},
+						{
+							"name": "aggMonthlyRevenue"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          order_id as string,",
+						"          customer_id as string,",
+						"          order_date as date,",
+						"          order_time as timestamp,",
+						"          channel as string,",
+						"          status as string,",
+						"          payment_mode as string,",
+						"          subtotal_amount as decimal(14,2),",
+						"          tax_amount as decimal(12,2),",
+						"          shipping_charge as decimal(10,2),",
+						"          total_amount as decimal(14,2),",
+						"          delivery_city as string,",
+						"          warehouse_id as string,",
+						"          is_gift as boolean,",
+						"          expected_delivery_date as date,",
+						"          actual_delivery_date as date",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceFactOrders",
+						"sourceFactOrders derive(revenue_year = year(toDate(toString(order_date),'yyyy-MM-dd')),",
+						"          revenue_month = month(toDate(toString(order_date),'yyyy-MM-dd'))) ~> derivedRevenue",
+						"derivedRevenue aggregate(groupBy(revenue_year,",
+						"          revenue_month,",
+						"          delivery_city),",
+						"     {total_revenue } = sum(total_amount)) ~> aggMonthlyRevenue",
+						"aggMonthlyRevenue sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          agg_id as integer,",
+						"          city as string,",
+						"          revenue_year as integer,",
+						"          revenue_month as integer,",
+						"          online_order_revenue as decimal(18,2),",
+						"          store_revenue as decimal(18,2),",
+						"          total_revenue as decimal(18,2),",
+						"          online_order_count as integer,",
+						"          store_transaction_count as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkMonthlyRevenue"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_agg_product_performance')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "Dim_Fact_OrderItems",
+								"type": "DatasetReference"
+							},
+							"name": "sourceOrderItems"
+						},
+						{
+							"dataset": {
+								"referenceName": "Dim_Product",
+								"type": "DatasetReference"
+							},
+							"name": "sourceProducts"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Agg_Product_Performance",
+								"type": "DatasetReference"
+							},
+							"name": "sinkProductPerf"
+						}
+					],
+					"transformations": [
+						{
+							"name": "aggProducts"
+						},
+						{
+							"name": "joinProducts"
+						},
+						{
+							"name": "derivedProducts"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          order_item_id as integer,",
+						"          order_id as string,",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          quantity as integer,",
+						"          unit_price as decimal(12,2),",
+						"          discount_pct as decimal(5,2),",
+						"          line_total as decimal(14,2)",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceOrderItems",
+						"source(output(",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          category as string,",
+						"          sub_category as string,",
+						"          supplier_id as string,",
+						"          unit_price as decimal(12,2),",
+						"          cost_price as decimal(12,2),",
+						"          stock_quantity as integer,",
+						"          reorder_level as integer,",
+						"          weight_kg as decimal(8,2),",
+						"          is_discontinued as boolean,",
+						"          launch_date as date",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceProducts",
+						"sourceOrderItems aggregate(groupBy(product_id,",
+						"          product_name),",
+						"     {total_units_sold } = sum(quantity),",
+						"          {total_revenue } = sum(line_total)) ~> aggProducts",
+						"aggProducts, sourceProducts join(aggProducts@product_id == sourceProducts@product_id,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinProducts",
+						"joinProducts derive({current_stock } = stock_quantity,",
+						"          {return_rate_pct } = toDecimal(0.0)) ~> derivedProducts",
+						"derivedProducts sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          category as string,",
+						"          sub_category as string,",
+						"          total_units_sold as long,",
+						"          total_revenue as decimal(18,2),",
+						"          total_returns as integer,",
+						"          return_rate_pct as decimal(6,2),",
+						"          current_stock_qty as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkProductPerf"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_load_store_transactions')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "Dim_fact_Store_transactions",
+								"type": "DatasetReference"
+							},
+							"name": "sourceTransactions"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Dim_fact_Store_transactions",
+								"type": "DatasetReference"
+							},
+							"name": "sinkTransactions"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedTransactions"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          transaction_id as string,",
+						"          store_id as string,",
+						"          store_name as string,",
+						"          city as string,",
+						"          transaction_date as date,",
+						"          transaction_time as timestamp,",
+						"          transaction_year as integer,",
+						"          transaction_month as integer,",
+						"          cashier_employee_id as string,",
+						"          customer_id as string,",
+						"          num_products as integer,",
+						"          gross_amount as decimal(12,2),",
+						"          discount_amount as decimal(10,2),",
+						"          net_amount as decimal(12,2),",
+						"          payment_mode as string,",
+						"          invoice_number as string,",
+						"          is_returned as boolean",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     isolationLevel: 'READ_UNCOMMITTED',",
+						"     format: 'table') ~> sourceTransactions",
+						"sourceTransactions derive(transaction_year = year(toDate(toString(transaction_date),'yyyy-MM-dd')),",
+						"          transaction_month = toInteger(substring(toString(transaction_date),6,2))) ~> derivedTransactions",
+						"derivedTransactions sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          transaction_id as string,",
+						"          store_id as string,",
+						"          store_name as string,",
+						"          city as string,",
+						"          transaction_date as date,",
+						"          transaction_time as timestamp,",
+						"          transaction_year as integer,",
+						"          transaction_month as integer,",
+						"          cashier_employee_id as string,",
+						"          customer_id as string,",
+						"          num_products as integer,",
+						"          gross_amount as decimal(12,2),",
+						"          discount_amount as decimal(10,2),",
+						"          net_amount as decimal(12,2),",
+						"          payment_mode as string,",
+						"          invoice_number as string,",
+						"          is_returned as boolean",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkTransactions"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_build_aggregations')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "df_act_monthly_revenue",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_agg_monthly_revenue",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceFactOrders": {},
+									"sinkMonthlyRevenue": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "df_act_product_performance",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "df_act_monthly_revenue",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_agg_product_performance",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceOrderItems": {},
+									"sourceProducts": {},
+									"sinkProductPerf": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "df_act_customer_summary",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "df_act_product_performance",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_agg_customer_summary",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceOrders": {},
+									"sourceCustomers": {},
+									"sinkCustomerSummary": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-05-12T07:12:01Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_agg_monthly_revenue')]",
+				"[concat(variables('factoryId'), '/dataflows/df_agg_product_performance')]",
+				"[concat(variables('factoryId'), '/dataflows/df_agg_customer_summary')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_load_store_transactions')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "df_act_transactions",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_load_store_transactions",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceTransactions": {},
+									"sinkTransactions": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-05-12T07:34:47Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_load_store_transactions')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_dim_customers')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_Blob_Customer",
+								"type": "DatasetReference"
+							},
+							"name": "sourceCustomers"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Dim_Customer",
+								"type": "DatasetReference"
+							},
+							"name": "sinkCustomers"
+						}
+					],
+					"transformations": [
+						{
+							"name": "filterActiveCustomers"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          customer_id as string,",
+						"          first_name as string,",
+						"          last_name as string,",
+						"          email as string,",
+						"          phone as string,",
+						"          city as string,",
+						"          state as string,",
+						"          pincode as string,",
+						"          tier as string,",
+						"          segment as string,",
+						"          registration_date as string,",
+						"          is_active as string,",
+						"          credit_limit as string,",
+						"          loyalty_points as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> sourceCustomers",
+						"sourceCustomers filter(is_active == '1') ~> filterActiveCustomers",
+						"filterActiveCustomers sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          customer_id as string,",
+						"          first_name as string,",
+						"          last_name as string,",
+						"          email as string,",
+						"          phone as string,",
+						"          city as string,",
+						"          state as string,",
+						"          pincode as string,",
+						"          tier as string,",
+						"          segment as string,",
+						"          registration_date as date,",
+						"          credit_limit as decimal(12,2),",
+						"          loyalty_points as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkCustomers"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_dim_employees')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "JS_Blob_Employees",
+								"type": "DatasetReference"
+							},
+							"name": "sourceEmployees"
+						},
+						{
+							"dataset": {
+								"referenceName": "JS_Blob_Employees",
+								"type": "DatasetReference"
+							},
+							"name": "sourceManagers"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Dim_Employees",
+								"type": "DatasetReference"
+							},
+							"name": "sinkEmployees"
+						}
+					],
+					"transformations": [
+						{
+							"name": "aggManagers"
+						},
+						{
+							"name": "joinEmployees"
+						},
+						{
+							"name": "derivedEmployees"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          employee_id as string,",
+						"          first_name as string,",
+						"          last_name as string,",
+						"          email as string,",
+						"          phone as string,",
+						"          department as string,",
+						"          designation as string,",
+						"          city as string,",
+						"          date_of_joining as string,",
+						"          date_of_birth as string,",
+						"          education as string,",
+						"          base_salary as double,",
+						"          performance_rating as double,",
+						"          manager_id as string,",
+						"          is_active as boolean,",
+						"          annual_leaves_remaining as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     documentForm: 'arrayOfDocuments') ~> sourceEmployees",
+						"source(output(",
+						"          employee_id as string,",
+						"          first_name as string,",
+						"          last_name as string,",
+						"          email as string,",
+						"          phone as string,",
+						"          department as string,",
+						"          designation as string,",
+						"          city as string,",
+						"          date_of_joining as string,",
+						"          date_of_birth as string,",
+						"          education as string,",
+						"          base_salary as double,",
+						"          performance_rating as double,",
+						"          manager_id as string,",
+						"          is_active as boolean,",
+						"          annual_leaves_remaining as integer",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     documentForm: 'arrayOfDocuments') ~> sourceManagers",
+						"sourceManagers aggregate(groupBy(manager_id),",
+						"     manager_count = count(manager_id)) ~> aggManagers",
+						"sourceEmployees, aggManagers join(employee_id == aggManagers@manager_id,",
+						"     joinType:'left',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> joinEmployees",
+						"joinEmployees derive(is_manager = iif(!isNull(aggManagers@manager_id), 1, 0)) ~> derivedEmployees",
+						"derivedEmployees sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          employee_id as string,",
+						"          first_name as string,",
+						"          last_name as string,",
+						"          email as string,",
+						"          phone as string,",
+						"          department as string,",
+						"          designation as string,",
+						"          city as string,",
+						"          date_of_joining as date,",
+						"          date_of_birth as date,",
+						"          education as string,",
+						"          base_salary as decimal(12,2),",
+						"          performance_rating as decimal(3,1),",
+						"          manager_id as string,",
+						"          is_active as boolean,",
+						"          annual_leaves_remaining as integer,",
+						"          is_manager as boolean",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkEmployees"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/JS_Blob_Employees')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_dim_products')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_Blob_Product",
+								"type": "DatasetReference"
+							},
+							"name": "sourceProducts"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Dim_Product",
+								"type": "DatasetReference"
+							},
+							"name": "sinkProducts"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedProducts"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          category as string,",
+						"          sub_category as string,",
+						"          supplier_id as string,",
+						"          unit_price as string,",
+						"          cost_price as string,",
+						"          stock_quantity as string,",
+						"          reorder_level as string,",
+						"          weight_kg as string,",
+						"          is_active as integer,",
+						"          launch_date as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> sourceProducts",
+						"sourceProducts derive(is_discontinued = iif(is_active == 0, 'Yes', 'No')) ~> derivedProducts",
+						"derivedProducts sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          category as string,",
+						"          sub_category as string,",
+						"          supplier_id as string,",
+						"          unit_price as decimal(12,2),",
+						"          cost_price as decimal(12,2),",
+						"          stock_quantity as integer,",
+						"          reorder_level as integer,",
+						"          weight_kg as decimal(8,2),",
+						"          is_discontinued as boolean,",
+						"          launch_date as date",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkProducts"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_dim_suppliers')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_Blob_Supplier",
+								"type": "DatasetReference"
+							},
+							"name": "sourcesuppliers"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Dim_Suppliers",
+								"type": "DatasetReference"
+							},
+							"name": "sinkSuppliers"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedContractActive"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          supplier_id as string,",
+						"          supplier_name as string,",
+						"          contact_person as string,",
+						"          email as string,",
+						"          phone as string,",
+						"          city as string,",
+						"          country as string,",
+						"          payment_terms_days as string,",
+						"          rating as string,",
+						"          contract_start_date as string,",
+						"          contract_end_date as date,",
+						"          is_active as string,",
+						"          gst_number as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> sourcesuppliers",
+						"sourcesuppliers derive(is_contract_active = iif(contract_end_date > currentDate(), 'Yes', 'No')) ~> derivedContractActive",
+						"derivedContractActive sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          supplier_id as string,",
+						"          supplier_name as string,",
+						"          contact_person as string,",
+						"          email as string,",
+						"          phone as string,",
+						"          city as string,",
+						"          country as string,",
+						"          payment_terms_days as integer,",
+						"          rating as decimal(3,1),",
+						"          contract_start_date as date,",
+						"          contract_end_date as date,",
+						"          is_contract_active as boolean,",
+						"          is_active as boolean,",
+						"          gst_number as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkSuppliers"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Blob_Supplier')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_dim_warehouses')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "JS_Blob_Inventory",
+								"type": "DatasetReference"
+							},
+							"name": "sourceInventory"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Dim_Warehouses",
+								"type": "DatasetReference"
+							},
+							"name": "sinkWarehouses"
+						}
+					],
+					"transformations": [
+						{
+							"name": "aggWarehouses"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          snapshot_id as string,",
+						"          snapshot_date as string,",
+						"          warehouse_id as string,",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          category as string,",
+						"          qty_on_hand as integer,",
+						"          qty_reserved as integer,",
+						"          qty_in_transit as integer,",
+						"          unit_cost as double,",
+						"          total_inventory_value as double,",
+						"          days_of_supply as double,",
+						"          last_received_date as string,",
+						"          reorder_triggered as boolean",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     documentForm: 'documentPerLine') ~> sourceInventory",
+						"sourceInventory aggregate(groupBy(warehouse_id),",
+						"     warehouse_count = count(warehouse_id)) ~> aggWarehouses",
+						"aggWarehouses sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          warehouse_id as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkWarehouses"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/JS_Blob_Inventory')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_load_fact_orders')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "JS_Blob_Orders",
+								"type": "DatasetReference"
+							},
+							"name": "sourceOrders"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Dim_FactOrders",
+								"type": "DatasetReference"
+							},
+							"name": "sinkOrders"
+						},
+						{
+							"dataset": {
+								"referenceName": "Dim_Fact_OrderItems",
+								"type": "DatasetReference"
+							},
+							"name": "sinkOrderItems"
+						}
+					],
+					"transformations": [
+						{
+							"name": "flattenOrders"
+						},
+						{
+							"name": "selectOrders"
+						},
+						{
+							"name": "selectOrderItems"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          order_id as string,",
+						"          customer_id as string,",
+						"          order_date as string,",
+						"          order_time as string,",
+						"          channel as string,",
+						"          status as string,",
+						"          payment_mode as string,",
+						"          subtotal_amount as double,",
+						"          tax_amount as double,",
+						"          shipping_charge as integer,",
+						"          total_amount as double,",
+						"          delivery_city as string,",
+						"          warehouse_id as string,",
+						"          is_gift as boolean,",
+						"          expected_delivery_date as string,",
+						"          actual_delivery_date as string,",
+						"          items as (order_id as string, product_id as string, product_name as string, quantity as integer, unit_price as double, discount_pct as double, line_total as double)[]",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     documentForm: 'arrayOfDocuments') ~> sourceOrders",
+						"sourceOrders foldDown(unroll(items, items),",
+						"     mapColumn(",
+						"          order_id,",
+						"          customer_id,",
+						"          order_date,",
+						"          order_time,",
+						"          channel,",
+						"          status,",
+						"          payment_mode,",
+						"          subtotal_amount,",
+						"          tax_amount,",
+						"          shipping_charge,",
+						"          total_amount,",
+						"          delivery_city,",
+						"          warehouse_id,",
+						"          is_gift,",
+						"          expected_delivery_date,",
+						"          actual_delivery_date,",
+						"          items",
+						"     ),",
+						"     skipDuplicateMapInputs: false,",
+						"     skipDuplicateMapOutputs: false) ~> flattenOrders",
+						"flattenOrders select(mapColumn(",
+						"          order_id,",
+						"          customer_id,",
+						"          order_date,",
+						"          order_time,",
+						"          channel,",
+						"          status,",
+						"          payment_mode,",
+						"          subtotal_amount,",
+						"          tax_amount,",
+						"          shipping_charge,",
+						"          total_amount,",
+						"          delivery_city,",
+						"          warehouse_id,",
+						"          is_gift,",
+						"          expected_delivery_date,",
+						"          actual_delivery_date",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectOrders",
+						"flattenOrders select(mapColumn(",
+						"          items = items.product_name,",
+						"          product_name = items.product_id,",
+						"          quantity = items.quantity,",
+						"          unit_price = items.unit_price,",
+						"          order_id = items.order_id,",
+						"          discount_pct = items.discount_pct,",
+						"          line_total = items.line_total",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> selectOrderItems",
+						"selectOrders sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          order_id as string,",
+						"          customer_id as string,",
+						"          order_date as date,",
+						"          order_time as timestamp,",
+						"          channel as string,",
+						"          status as string,",
+						"          payment_mode as string,",
+						"          subtotal_amount as decimal(14,2),",
+						"          tax_amount as decimal(12,2),",
+						"          shipping_charge as decimal(10,2),",
+						"          total_amount as decimal(14,2),",
+						"          delivery_city as string,",
+						"          warehouse_id as string,",
+						"          is_gift as boolean,",
+						"          expected_delivery_date as date,",
+						"          actual_delivery_date as date",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkOrders",
+						"selectOrderItems sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          order_item_id as integer,",
+						"          order_id as string,",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          quantity as integer,",
+						"          unit_price as decimal(12,2),",
+						"          discount_pct as decimal(5,2),",
+						"          line_total as decimal(14,2)",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkOrderItems"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/JS_Blob_Orders')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_load_inventory')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "JS_Blob_Inventory",
+								"type": "DatasetReference"
+							},
+							"name": "sourceInventory"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Dim_Fact_Inventory_Snapshots",
+								"type": "DatasetReference"
+							},
+							"name": "sinkInventory"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedInventory"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          snapshot_id as string,",
+						"          snapshot_date as string,",
+						"          warehouse_id as string,",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          category as string,",
+						"          qty_on_hand as integer,",
+						"          qty_reserved as integer,",
+						"          qty_in_transit as integer,",
+						"          unit_cost as double,",
+						"          total_inventory_value as double,",
+						"          days_of_supply as double,",
+						"          last_received_date as string,",
+						"          reorder_triggered as boolean",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     documentForm: 'documentPerLine') ~> sourceInventory",
+						"sourceInventory derive(reorder_flag = iif(reorder_triggered == true(), 'Yes', 'No')) ~> derivedInventory",
+						"derivedInventory sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          snapshot_id as string,",
+						"          snapshot_date as date,",
+						"          warehouse_id as string,",
+						"          product_id as string,",
+						"          product_name as string,",
+						"          category as string,",
+						"          qty_on_hand as integer,",
+						"          qty_reserved as integer,",
+						"          qty_in_transit as integer,",
+						"          unit_cost as decimal(12,2),",
+						"          total_inventory_value as decimal(16,2),",
+						"          days_of_supply as decimal(8,1),",
+						"          last_received_date as date,",
+						"          reorder_flag as string",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkInventory"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/JS_Blob_Inventory')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/df_load_returns')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_Blob_ReturnandRefund",
+								"type": "DatasetReference"
+							},
+							"name": "sourceReturns"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "Dim_FactReturns",
+								"type": "DatasetReference"
+							},
+							"name": "sinkReturns"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedReturns"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          return_id as string,",
+						"          order_id as string,",
+						"          customer_id as string,",
+						"          return_date as string,",
+						"          reason as string,",
+						"          return_status as string,",
+						"          refund_amount as string,",
+						"          refund_mode as string,",
+						"          refund_date as string,",
+						"          restocking_fee as string,",
+						"          condition_on_return as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> sourceReturns",
+						"sourceReturns derive(rejected_flag = iif(return_status == 'Rejected', 1, 0)) ~> derivedReturns",
+						"derivedReturns sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          return_id as string,",
+						"          order_id as string,",
+						"          customer_id as string,",
+						"          return_date as date,",
+						"          reason as string,",
+						"          return_status as string,",
+						"          refund_amount as decimal(14,2),",
+						"          refund_mode as string,",
+						"          refund_date as date,",
+						"          restocking_fee as decimal(10,2),",
+						"          condition_on_return as string,",
+						"          rejected_flag as boolean",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     truncate:true,",
+						"     format: 'table',",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     errorHandlingOption: 'stopOnFirstError') ~> sinkReturns"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pl_load_dimensions')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "df_act_suppliers",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_dim_suppliers",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourcesuppliers": {},
+									"sinkSuppliers": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "df_act_products",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "df_act_suppliers",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_dim_products",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceProducts": {},
+									"sinkProducts": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "df_act_employees",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "df_act_customers",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_dim_employees",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceEmployees": {},
+									"sourceManagers": {},
+									"sinkEmployees": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "df_act_customers",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "df_act_products",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_dim_customers",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceCustomers": {},
+									"sinkCustomers": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					},
+					{
+						"name": "df_act_warehouses",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "df_act_employees",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "df_dim_warehouses",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"sourceInventory": {},
+									"sinkWarehouses": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2026-05-12T07:12:01Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/df_dim_suppliers')]",
+				"[concat(variables('factoryId'), '/dataflows/df_dim_products')]",
+				"[concat(variables('factoryId'), '/dataflows/df_dim_employees')]",
+				"[concat(variables('factoryId'), '/dataflows/df_dim_customers')]",
+				"[concat(variables('factoryId'), '/dataflows/df_dim_warehouses')]"
+			]
+		}
+	]
+}

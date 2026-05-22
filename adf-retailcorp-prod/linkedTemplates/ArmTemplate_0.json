@@ -1,0 +1,1423 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-retailcorp-prod"
+		},
+		"ls_sql_dw_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'ls_sql_dw'"
+		},
+		"ls_blob_storage_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_blob_storage'",
+			"defaultValue": "DefaultEndpointsProtocol=https;AccountName=stretailcorpdata;EndpointSuffix=core.windows.net;"
+		},
+		"ls_key_vault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://kv-retailcorp-secrets.vault.azure.net/"
+		},
+		"ls_sql_dw_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "db-retailcorp.database.windows.net"
+		},
+		"ls_sql_dw_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "sqldb-retailcorp-dw"
+		},
+		"ls_sql_dw_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "SQLAdmin"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_key_vault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('ls_key_vault_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_sql_dw')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"server": "[parameters('ls_sql_dw_properties_typeProperties_server')]",
+					"database": "[parameters('ls_sql_dw_properties_typeProperties_database')]",
+					"encrypt": "optional",
+					"trustServerCertificate": true,
+					"authenticationType": "SQL",
+					"userName": "[parameters('ls_sql_dw_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('ls_sql_dw_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_Monthly_Revenue')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "agg_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "city",
+						"type": "varchar"
+					},
+					{
+						"name": "revenue_year",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "revenue_month",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "online_order_revenue",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "store_revenue",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "total_revenue",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "online_order_count",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "store_transaction_count",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "agg_monthly_revenue"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_Product_Performance')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "product_id",
+						"type": "varchar"
+					},
+					{
+						"name": "product_name",
+						"type": "varchar"
+					},
+					{
+						"name": "category",
+						"type": "varchar"
+					},
+					{
+						"name": "sub_category",
+						"type": "varchar"
+					},
+					{
+						"name": "total_units_sold",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "total_revenue",
+						"type": "decimal",
+						"precision": 18,
+						"scale": 2
+					},
+					{
+						"name": "total_returns",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "return_rate_pct",
+						"type": "decimal",
+						"precision": 6,
+						"scale": 2
+					},
+					{
+						"name": "current_stock_qty",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "agg_product_performance"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_customer_summary')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "customer_id",
+						"type": "varchar"
+					},
+					{
+						"name": "full_name",
+						"type": "varchar"
+					},
+					{
+						"name": "city",
+						"type": "varchar"
+					},
+					{
+						"name": "tier",
+						"type": "varchar"
+					},
+					{
+						"name": "segment",
+						"type": "varchar"
+					},
+					{
+						"name": "total_orders",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "total_spend",
+						"type": "decimal",
+						"precision": 16,
+						"scale": 2
+					},
+					{
+						"name": "avg_order_value",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "last_order_date",
+						"type": "date"
+					},
+					{
+						"name": "loyalty_points",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "agg_customer_summary"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_Customer')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "customer_id",
+						"type": "varchar"
+					},
+					{
+						"name": "first_name",
+						"type": "varchar"
+					},
+					{
+						"name": "last_name",
+						"type": "varchar"
+					},
+					{
+						"name": "email",
+						"type": "varchar"
+					},
+					{
+						"name": "phone",
+						"type": "varchar"
+					},
+					{
+						"name": "city",
+						"type": "varchar"
+					},
+					{
+						"name": "state",
+						"type": "varchar"
+					},
+					{
+						"name": "pincode",
+						"type": "varchar"
+					},
+					{
+						"name": "tier",
+						"type": "varchar"
+					},
+					{
+						"name": "segment",
+						"type": "varchar"
+					},
+					{
+						"name": "registration_date",
+						"type": "date"
+					},
+					{
+						"name": "credit_limit",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "loyalty_points",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "dim_customers"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_Employees')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "employee_id",
+						"type": "varchar"
+					},
+					{
+						"name": "first_name",
+						"type": "varchar"
+					},
+					{
+						"name": "last_name",
+						"type": "varchar"
+					},
+					{
+						"name": "email",
+						"type": "varchar"
+					},
+					{
+						"name": "phone",
+						"type": "varchar"
+					},
+					{
+						"name": "department",
+						"type": "varchar"
+					},
+					{
+						"name": "designation",
+						"type": "varchar"
+					},
+					{
+						"name": "city",
+						"type": "varchar"
+					},
+					{
+						"name": "date_of_joining",
+						"type": "date"
+					},
+					{
+						"name": "date_of_birth",
+						"type": "date"
+					},
+					{
+						"name": "education",
+						"type": "varchar"
+					},
+					{
+						"name": "base_salary",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "performance_rating",
+						"type": "decimal",
+						"precision": 3,
+						"scale": 1
+					},
+					{
+						"name": "manager_id",
+						"type": "varchar"
+					},
+					{
+						"name": "is_active",
+						"type": "bit"
+					},
+					{
+						"name": "annual_leaves_remaining",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "is_manager",
+						"type": "bit"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "dim_employees"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_FactOrders')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "order_id",
+						"type": "varchar"
+					},
+					{
+						"name": "customer_id",
+						"type": "varchar"
+					},
+					{
+						"name": "order_date",
+						"type": "date"
+					},
+					{
+						"name": "order_time",
+						"type": "time",
+						"scale": 7
+					},
+					{
+						"name": "channel",
+						"type": "varchar"
+					},
+					{
+						"name": "status",
+						"type": "varchar"
+					},
+					{
+						"name": "payment_mode",
+						"type": "varchar"
+					},
+					{
+						"name": "subtotal_amount",
+						"type": "decimal",
+						"precision": 14,
+						"scale": 2
+					},
+					{
+						"name": "tax_amount",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "shipping_charge",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					},
+					{
+						"name": "total_amount",
+						"type": "decimal",
+						"precision": 14,
+						"scale": 2
+					},
+					{
+						"name": "delivery_city",
+						"type": "varchar"
+					},
+					{
+						"name": "warehouse_id",
+						"type": "varchar"
+					},
+					{
+						"name": "is_gift",
+						"type": "bit"
+					},
+					{
+						"name": "expected_delivery_date",
+						"type": "date"
+					},
+					{
+						"name": "actual_delivery_date",
+						"type": "date"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "fact_orders"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_FactReturns')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "return_id",
+						"type": "varchar"
+					},
+					{
+						"name": "order_id",
+						"type": "varchar"
+					},
+					{
+						"name": "customer_id",
+						"type": "varchar"
+					},
+					{
+						"name": "return_date",
+						"type": "date"
+					},
+					{
+						"name": "reason",
+						"type": "varchar"
+					},
+					{
+						"name": "return_status",
+						"type": "varchar"
+					},
+					{
+						"name": "refund_amount",
+						"type": "decimal",
+						"precision": 14,
+						"scale": 2
+					},
+					{
+						"name": "refund_mode",
+						"type": "varchar"
+					},
+					{
+						"name": "refund_date",
+						"type": "date"
+					},
+					{
+						"name": "restocking_fee",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					},
+					{
+						"name": "condition_on_return",
+						"type": "varchar"
+					},
+					{
+						"name": "rejected_flag",
+						"type": "bit"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "fact_returns"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_Fact_Inventory_Snapshots')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "snapshot_id",
+						"type": "varchar"
+					},
+					{
+						"name": "snapshot_date",
+						"type": "date"
+					},
+					{
+						"name": "warehouse_id",
+						"type": "varchar"
+					},
+					{
+						"name": "product_id",
+						"type": "varchar"
+					},
+					{
+						"name": "product_name",
+						"type": "varchar"
+					},
+					{
+						"name": "category",
+						"type": "varchar"
+					},
+					{
+						"name": "qty_on_hand",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "qty_reserved",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "qty_in_transit",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "unit_cost",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_inventory_value",
+						"type": "decimal",
+						"precision": 16,
+						"scale": 2
+					},
+					{
+						"name": "days_of_supply",
+						"type": "decimal",
+						"precision": 8,
+						"scale": 1
+					},
+					{
+						"name": "last_received_date",
+						"type": "date"
+					},
+					{
+						"name": "reorder_flag",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "fact_inventory_snapshots"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_Fact_OrderItems')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "order_item_id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "order_id",
+						"type": "varchar"
+					},
+					{
+						"name": "product_id",
+						"type": "varchar"
+					},
+					{
+						"name": "product_name",
+						"type": "varchar"
+					},
+					{
+						"name": "quantity",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "unit_price",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "discount_pct",
+						"type": "decimal",
+						"precision": 5,
+						"scale": 2
+					},
+					{
+						"name": "line_total",
+						"type": "decimal",
+						"precision": 14,
+						"scale": 2
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "fact_order_items"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_Product')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "product_id",
+						"type": "varchar"
+					},
+					{
+						"name": "product_name",
+						"type": "varchar"
+					},
+					{
+						"name": "category",
+						"type": "varchar"
+					},
+					{
+						"name": "sub_category",
+						"type": "varchar"
+					},
+					{
+						"name": "supplier_id",
+						"type": "varchar"
+					},
+					{
+						"name": "unit_price",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "cost_price",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "stock_quantity",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "reorder_level",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "weight_kg",
+						"type": "decimal",
+						"precision": 8,
+						"scale": 2
+					},
+					{
+						"name": "is_discontinued",
+						"type": "bit"
+					},
+					{
+						"name": "launch_date",
+						"type": "date"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "dim_products"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_Suppliers')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "supplier_id",
+						"type": "varchar"
+					},
+					{
+						"name": "supplier_name",
+						"type": "varchar"
+					},
+					{
+						"name": "contact_person",
+						"type": "varchar"
+					},
+					{
+						"name": "email",
+						"type": "varchar"
+					},
+					{
+						"name": "phone",
+						"type": "varchar"
+					},
+					{
+						"name": "city",
+						"type": "varchar"
+					},
+					{
+						"name": "country",
+						"type": "varchar"
+					},
+					{
+						"name": "payment_terms_days",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "rating",
+						"type": "decimal",
+						"precision": 3,
+						"scale": 1
+					},
+					{
+						"name": "contract_start_date",
+						"type": "date"
+					},
+					{
+						"name": "contract_end_date",
+						"type": "date"
+					},
+					{
+						"name": "is_contract_active",
+						"type": "bit"
+					},
+					{
+						"name": "is_active",
+						"type": "bit"
+					},
+					{
+						"name": "gst_number",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "dim_suppliers"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_Warehouses')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "warehouse_id",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "dim_warehouses"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dim_fact_Store_transactions')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_sql_dw",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "SQL_Datasets"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "transaction_id",
+						"type": "varchar"
+					},
+					{
+						"name": "store_id",
+						"type": "varchar"
+					},
+					{
+						"name": "store_name",
+						"type": "varchar"
+					},
+					{
+						"name": "city",
+						"type": "varchar"
+					},
+					{
+						"name": "transaction_date",
+						"type": "date"
+					},
+					{
+						"name": "transaction_time",
+						"type": "time",
+						"scale": 7
+					},
+					{
+						"name": "transaction_year",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "transaction_month",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "cashier_employee_id",
+						"type": "varchar"
+					},
+					{
+						"name": "customer_id",
+						"type": "varchar"
+					},
+					{
+						"name": "num_products",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "gross_amount",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "discount_amount",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					},
+					{
+						"name": "net_amount",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "payment_mode",
+						"type": "varchar"
+					},
+					{
+						"name": "invoice_number",
+						"type": "varchar"
+					},
+					{
+						"name": "is_returned",
+						"type": "bit"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "fact_store_transactions"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_sql_dw')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_blob_storage')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_blob_storage_connectionString')]",
+					"accountKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "ls_key_vault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "blob-storage-connection-string"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_key_vault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Blob_Customer')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blob_storage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Blob_Datasets"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "customers.csv",
+						"folderPath": "customers.csv",
+						"container": "raw-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "customer_id",
+						"type": "String"
+					},
+					{
+						"name": "first_name",
+						"type": "String"
+					},
+					{
+						"name": "last_name",
+						"type": "String"
+					},
+					{
+						"name": "email",
+						"type": "String"
+					},
+					{
+						"name": "phone",
+						"type": "String"
+					},
+					{
+						"name": "city",
+						"type": "String"
+					},
+					{
+						"name": "state",
+						"type": "String"
+					},
+					{
+						"name": "pincode",
+						"type": "String"
+					},
+					{
+						"name": "tier",
+						"type": "String"
+					},
+					{
+						"name": "segment",
+						"type": "String"
+					},
+					{
+						"name": "registration_date",
+						"type": "String"
+					},
+					{
+						"name": "is_active",
+						"type": "String"
+					},
+					{
+						"name": "credit_limit",
+						"type": "String"
+					},
+					{
+						"name": "loyalty_points",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_blob_storage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Blob_OrderItem')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blob_storage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Blob_Datasets"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "order_items.csv",
+						"folderPath": "order_items.csv",
+						"container": "raw-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "order_id",
+						"type": "String"
+					},
+					{
+						"name": "product_id",
+						"type": "String"
+					},
+					{
+						"name": "product_name",
+						"type": "String"
+					},
+					{
+						"name": "quantity",
+						"type": "String"
+					},
+					{
+						"name": "unit_price",
+						"type": "String"
+					},
+					{
+						"name": "discount_pct",
+						"type": "String"
+					},
+					{
+						"name": "line_total",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_blob_storage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Blob_Product')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blob_storage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Blob_Datasets"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "products.csv",
+						"folderPath": "products.csv",
+						"container": "raw-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "product_id",
+						"type": "String"
+					},
+					{
+						"name": "product_name",
+						"type": "String"
+					},
+					{
+						"name": "category",
+						"type": "String"
+					},
+					{
+						"name": "sub_category",
+						"type": "String"
+					},
+					{
+						"name": "supplier_id",
+						"type": "String"
+					},
+					{
+						"name": "unit_price",
+						"type": "String"
+					},
+					{
+						"name": "cost_price",
+						"type": "String"
+					},
+					{
+						"name": "stock_quantity",
+						"type": "String"
+					},
+					{
+						"name": "reorder_level",
+						"type": "String"
+					},
+					{
+						"name": "weight_kg",
+						"type": "String"
+					},
+					{
+						"name": "is_active",
+						"type": "String"
+					},
+					{
+						"name": "launch_date",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_blob_storage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Blob_ReturnandRefund')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_blob_storage",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "Blob_Datasets"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "returns_and_refunds.csv",
+						"folderPath": "returns_and_refunds.csv",
+						"container": "raw-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "return_id",
+						"type": "String"
+					},
+					{
+						"name": "order_id",
+						"type": "String"
+					},
+					{
+						"name": "customer_id",
+						"type": "String"
+					},
+					{
+						"name": "return_date",
+						"type": "String"
+					},
+					{
+						"name": "reason",
+						"type": "String"
+					},
+					{
+						"name": "return_status",
+						"type": "String"
+					},
+					{
+						"name": "refund_amount",
+						"type": "String"
+					},
+					{
+						"name": "refund_mode",
+						"type": "String"
+					},
+					{
+						"name": "refund_date",
+						"type": "String"
+					},
+					{
+						"name": "restocking_fee",
+						"type": "String"
+					},
+					{
+						"name": "condition_on_return",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_blob_storage')]"
+			]
+		}
+	]
+}
